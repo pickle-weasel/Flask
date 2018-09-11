@@ -20,7 +20,7 @@ Measurement = Base.classes.measurement
 Station = Base.classes.station
 
 # Create our session (link) from Python to the DB
-session = Session(engine)
+session = Session(bind=engine)
 
 #################################################
 # Flask Setup
@@ -76,8 +76,10 @@ def stations():
     station_list = []
 
     for station in stations:
-        station_list.append(station.id)
-        station_list.append(station.name)
+        station_dict = {}
+        station_dict['Id'] = station.id
+        station_dict['Name'] = station.name
+        station_list.append(station_dict)
     
     return jsonify(station_list)
 
@@ -90,7 +92,10 @@ def temps():
     temp_list = []
 
     for temp in temps:
-        temp_list.append(temp.tobs)
+        temp_dict = {}
+        temp_dict['Date'] = temp.date
+        temp_dict['Temp Observed'] = temp.tobs
+        temp_list.append(temp_dict)
 
     return jsonify(temp_list)
 
@@ -108,8 +113,18 @@ def one_date():
         ).filter(
             Measurement.date >= '2017-01-01'
         ).all()
+
+    single_list = []
+
+    for row in single_date:
+        single_dict = {}
+        single_dict['Date'] = row[0]
+        single_dict['Min'] = row[1]
+        single_dict['Avg'] = row[2]
+        single_dict['Max'] = row[3]
+        single_list.append(single_dict)
     
-    return jsonify(single_date)
+    return jsonify(single_list)
 
 @app.route('/api/v1.0/range')
 def range_dates():
@@ -128,7 +143,17 @@ def range_dates():
             Measurement.date <= '2017-31-12'
         ).all()
 
-    return jsonify(range_date)
+    range_list = []
+
+    for row in range_date:
+        range_dict = {}
+        range_dict['Date'] = row[0]
+        range_dict['Min'] = row[1]
+        range_dict['Avg'] = row[2]
+        range_dict['Max'] = row[3]
+        range_list.append(range_dict)
+
+    return jsonify(range_list)
 
 if __name__ == '__main__':
     app.run(debug=True)
